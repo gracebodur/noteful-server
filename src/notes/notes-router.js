@@ -12,7 +12,6 @@ notesRouter
     })
     .post(jsonParser, (req, res) => {
         const id = uuid()
-        // const modified = new Date()
         const { name, folderId, content } = req.body
         const newNote = { id, name, folderId, content }
 
@@ -31,29 +30,20 @@ notesRouter
             .location(`http://localhost:8000/notes/${newNote.id}`)
             .json(newNote)
     })
-        // if(!name) {
-        //     logger.error(`New note name is required`)
-        //     return res
-        //         .status(400)
-        //         .json({
-        //             error: {message: `Missing 'name' in request body`}
-        //         })
-        // }
-        // if(!folderId) {
-        //     logger.error(`New note folderId is required`)
-        //     return res
-        //         .status(400)
-        //         .json({
-        //             error: {message: `Missing 'folderId' in request body`}
-        //         })
-        // }
-        // if(!content) {
-        //     logger.error(`New note content is required`)
-        //     return res
-        //         .status(400)
-        //         .json({
-        //             error: {message: `Missing 'content' in request body`}
-        //         })
-        // }
+
+notesRouter
+    .route('/notes/:id')
+    .get((req, res) => {
+        const { id } = req.params
+        const note = notes.find(n => n.id == id)
+
+        if(!note) {
+            logger.error(`Note with id: ${id} not found.`)
+            return res
+                .status(404)
+                .send('Note not found')
+        }
+        res.json(note)
+    })
 
 module.exports = notesRouter
