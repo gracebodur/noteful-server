@@ -3,7 +3,7 @@ const logger = require('../logger')
 const { folders } = require('../store')
 const uuid = require('uuid/v4')
 
-const bodyParser = express.Router
+const bodyParser = express.json()
 const foldersRouter = express.Router()
 
 foldersRouter
@@ -12,13 +12,13 @@ foldersRouter
         res.json(folders)
     })
     .post(bodyParser, (req, res) => {
-        // const id = uuid()
+        const id = uuid()
         const { name } = req.body
         const newFolder = { id, name }
 
         if(!name) {
             logger.error(`Folder name is required`)
-            return res.status(400).send('Title, url and description are required')
+            return res.status(400).send('Folder name is required')
         }
 
         folders.push(newFolder)
