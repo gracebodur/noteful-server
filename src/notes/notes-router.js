@@ -45,5 +45,22 @@ notesRouter
         }
         res.json(note)
     })
+    .delete((req, res) => {
+        const { id } = req.params
+        const noteIndex = notes.findIndex(n => n.id == id)
+
+        if(noteIndex === -1) {
+            logger.error(`Note with id: ${id} not found.`)
+            return res 
+                .status(400)
+                .send('Note not found')
+        }
+
+        notes.splice(noteIndex, 1)
+        logger.info(`Note with id: ${id} deleted.`)
+        res
+        .status(204)
+        .end()
+    })
 
 module.exports = notesRouter
