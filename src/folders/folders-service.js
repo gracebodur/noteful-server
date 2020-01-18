@@ -30,4 +30,4 @@ const FoldersService = {
     }
 } 
 
-module.exports = BookmarksService
+module.exports = FoldersService
