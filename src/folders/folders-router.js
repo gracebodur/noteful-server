@@ -32,6 +32,18 @@ foldersRouter
 
 foldersRouter
     .route('/folders/:id')
+    .get((req, res) => {
+        const { id } = req.params
+        const folder = folders.find(f => f.id == id)
+
+        if(!folder) {
+            logger.error(`Folder with id: ${id} not found.`)
+            return res
+                .status(404)
+                .send('Folder not found')
+        }
+        res.json(folder)
+    })
     .delete((req, res) => {
         const { id } = req.params
         const folderIndex = folders.findIndex(f => f.id == id)
