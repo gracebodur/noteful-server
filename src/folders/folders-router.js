@@ -1,6 +1,6 @@
 const express = require('express')
 const logger = require('../logger')
-const { folders } = require('../store')
+const { folders } = require('../folder-store')
 const uuid = require('uuid/v4')
 const jsonParser = express.json()
 const foldersRouter = express.Router()
