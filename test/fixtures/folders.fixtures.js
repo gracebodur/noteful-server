@@ -10,7 +10,7 @@ function makeFoldersArray() {
         },
         {
             id     : 3,
-            title  : "Daisies",
+            name  : "Daisies",
         },
     ] 
 }

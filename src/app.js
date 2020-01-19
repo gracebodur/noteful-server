@@ -30,8 +30,8 @@ app.use(function validateBearerToken(req, res, next) {
     next()
 })
 
-app.use(foldersRouter)
-app.use(notesRouter)
+app.use('/api/folders', foldersRouter)
+app.use('/api/notes', notesRouter)
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')

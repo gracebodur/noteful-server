@@ -37,7 +37,7 @@ foldersRouter
             logger.info(`Folder with id: ${newFolder.id} created`)
             res
             .status(201)
-            .location(`http://localhost:8000/folders/${newFolder.id}`)
+            .location(path.possix.join(req.originalUrl, `${newFolder.id}`))
             .json(newFolder)
         })
         .catch(next)
