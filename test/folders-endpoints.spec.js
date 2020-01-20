@@ -3,7 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const { makeFoldersArray } = require('./fixtures/folders.fixtures')
 
-describe.only('Folders Endpoints', function() {
+describe('Folders Endpoints', function() {
     let db
    
     before('make knex instance', () => {
@@ -20,11 +20,11 @@ describe.only('Folders Endpoints', function() {
 
     afterEach('cleanup', () => db('folders').truncate())
 
-    describe(`GET /api/folders`, () => {
+    describe(`GET /folders`, () => {
         context(`Given no folders`, () => {
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
-                    .get('/api/folders')
+                    .get('/folders')
                     .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                     .expect(200, [])
             })
@@ -41,18 +41,18 @@ describe.only('Folders Endpoints', function() {
 
             it('responds with 200 and all of the folders', () => {
                 return supertest(app)
-                .get('/api/folders')
+                .get('/folders')
                 .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                 .expect(200, testFolders)
             })
         })
     })
 
-    describe(`GET /api/folders/:id`, () => {
+    describe(`GET /folders/:id`, () => {
         context(`Given no folders`, () => {
             it(`responds with 404 when folders doesn't exist`, () => {
                 return supertest(app)
-                    .get(`/api/folders/123`)
+                    .get(`/folders/123`)
                     .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                     .expect(404, { error: {message: `Folder doesn't exist`}})
             })
@@ -71,7 +71,7 @@ describe.only('Folders Endpoints', function() {
                 const folderId = 2
                 const expectedFolder = testFolders[folderId - 1]
                 return supertest(app)
-                    .get(`/api/folders/${folderId}`)
+                    .get(`/folders/${folderId}`)
                     .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                     .expect(200, expectedFolder)
             })
@@ -91,7 +91,7 @@ describe.only('Folders Endpoints', function() {
        
             it('removes XSS attack content', () => {
               return supertest(app)
-                .get(`/api/folders/${maliciousFolders.id}`)
+                .get(`/folders/${maliciousFolders.id}`)
                 .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                 .expect(200)
                 .expect(res => {
@@ -101,24 +101,24 @@ describe.only('Folders Endpoints', function() {
           })
     })
 
-    describe(`POST /api/folders`, () => {
+    describe(`POST /folders`, () => {
         it(`creates a folder, responding with 201 and the new folder`,  function() {
         const newFolder = {
             name  : "Test POST folder",
          }
           return supertest(app)
-            .post('/api/folders')
+            .post('/folders')
             .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
             .send(newFolder)
             .expect(201)
             .expect(res => {
                  expect(res.body.name).to.eql(newFolder.name)
                  expect(res.body).to.have.property('id')
-                 expect(res.headers.location).to.eql(`/api/folders/${res.body.id}`)
+                 expect(res.headers.location).to.eql(`/folders/${res.body.id}`)
             })
             .then(res => 
             supertest(app)
-                .get(`/api/folders/${res.body.id}`)
+                .get(`/folders/${res.body.id}`)
                 .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                 .expect(res.body)
             )
@@ -133,7 +133,7 @@ describe.only('Folders Endpoints', function() {
                 it(`responds with 400 and an error message when the '${field}' is missing`, () => {
                 delete newFolder[field]
                 return supertest(app)
-                  .post('/api/folders')
+                  .post('/folders')
                   .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                   .send(newFolder)
                   .expect(400, {
@@ -142,12 +142,12 @@ describe.only('Folders Endpoints', function() {
             })
         })
 
-    describe(`DELETE /api/folders/:id`, () => {
+    describe(`DELETE /folders/:id`, () => {
         context(`Given no folders`, () => {
             it(`responds with 404`, () => {
               const folderId = 123456
               return supertest(app)
-                .delete(`/api/folders/${folderId}`)
+                .delete(`/folders/${folderId}`)
                 .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                 .expect(404, { error: { message: `Folder doesn't exist` } })
             })
@@ -166,25 +166,25 @@ describe.only('Folders Endpoints', function() {
                 const idToRemove = 2
                 const expectedFolder = testFolders.filter(folder => folder.id !== idToRemove)
                 return supertest(app)
-                .delete(`/api/folders/${idToRemove}`)
+                .delete(`/folders/${idToRemove}`)
                 .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                 .expect(204)
                 .then(res =>
                     supertest(app)
-                    .get(`/api/folders`)
+                    .get(`/folders`)
                     .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
-                    .expect(expectedFolders)
+                    .expect(expectedFolder)
                     )
                 })
             })
         })
 
-    describe.only(`PATCH /api/folders/:id`, () => {
+    describe.only(`PATCH /folders/:id`, () => {
         context(`Given no folders`, () => {
             it(`responds with 404`, () => {
                 const folderId = 123456
                 return supertest(app)
-                  .patch(`/api/folders/${folderId}`)
+                  .patch(`/folders/${folderId}`)
                   .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                   .expect(404, { error: { message: `Folder doesn't exist` } })
               })
@@ -209,13 +209,13 @@ describe.only('Folders Endpoints', function() {
                 ...updateFolder
               }
                return supertest(app)
-                 .patch(`/api/folders/${idToUpdate}`)
+                 .patch(`/folders/${idToUpdate}`)
                  .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                  .send(updateFolder)
                  .expect(204)
                  .then(res =>
                     supertest(app)
-                      .get(`/api/folders/${idToUpdate}`)
+                      .get(`/folders/${idToUpdate}`)
                       .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                       .expect(expectedFolder)
                 )
@@ -224,7 +224,7 @@ describe.only('Folders Endpoints', function() {
             it(`responds with 400 when no required fields supplied`, () => {
                 const idToUpdate = 2
                 return supertest(app)
-                  .patch(`/api/folders/${idToUpdate}`)
+                  .patch(`/folders/${idToUpdate}`)
                   .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                   .send({ irrelevantField: 'foo' })
                   .expect(400, {
@@ -245,7 +245,7 @@ describe.only('Folders Endpoints', function() {
                     }
               
                     return supertest(app)
-                      .patch(`/api/folders/${idToUpdate}`)
+                      .patch(`/folders/${idToUpdate}`)
                       .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                       .send({
                         ...updateFolder,
@@ -254,7 +254,7 @@ describe.only('Folders Endpoints', function() {
                       .expect(204)
                       .then(res =>
                         supertest(app)
-                          .get(`/api/folders/${idToUpdate}`)
+                          .get(`/folders/${idToUpdate}`)
                           .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                           .expect(expectedFolder)
                         )

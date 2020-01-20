@@ -4,11 +4,12 @@ const logger = require('../logger')
 const { folders } = require('../folder-store')
 const uuid = require('uuid/v4')
 const FoldersService = require('./folders-service')
+
 const jsonParser = express.json()
 const foldersRouter = express.Router()
 
 foldersRouter
-    .route('/folders')
+    .route('/')
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         FoldersService.getAllFolders(knexInstance)
