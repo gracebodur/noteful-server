@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const logger = require('../logger')
 const { notes } = require('../notes-store')
@@ -37,7 +38,7 @@ notesRouter
             logger.info(`Note with id: ${newNote.id} created`)
             res
             .status(201)
-            .location(`http://localhost:8000/notes/${newNote.id}`)
+            .location(path.posix.join(req.originalUrl, `${newNote.id}`))
             .json(newNote)
         })
         .catch(next)        
@@ -45,10 +46,12 @@ notesRouter
 
 notesRouter
     .route('/notes/:id')
-    .all((req, res, next) => {
+    .get((req, res) => {
+        const { id } = req.params
+        const note = notes.find(n => n.id == id)
         NotesService.getNoteById(
             req.app.get('db'),
-            req.params.id
+            id
         )
         .then(note => {
             if(!note) {
@@ -56,24 +59,11 @@ notesRouter
                     error: { message: `Note doesn't exist`}
                 })
             }
-            res.note = note
-            next()
+            res.json(note)
         })
         .catch(next)
     })
-    .get((req, res, next) => {
-        const { id } = req.params
-        const note = notes.find(n => n.id == id)
-
-        if(!note) {
-            logger.error(`Note with id: ${id} not found.`)
-            return res
-                .status(404)
-                .send('Note not found')
-        }
-        res.json(note)
-    })
-    .delete((req, res) => {
+    .delete((req, res, next) => {
         const { id } = req.params
         const noteIndex = notes.findIndex(n => n.id == id)
 
@@ -85,9 +75,7 @@ notesRouter
         }
 
         NotesService.deleteNote(
-            req.app.get('db'),
-            id
-        )
+            req.app.get('db'), id )
         .then(deletedNote => {
         logger.info(`Note with id: ${id} deleted.`)
         res
@@ -111,7 +99,7 @@ notesRouter
         NotesService.updateNote(
             req.app.get('db'),
             req.params.id,
-            folderToUpdate
+            noteToUpdate
         )
         .then(numRowsAffected => {
             res.status(204).end()

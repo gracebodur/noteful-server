@@ -1,7 +1,7 @@
 const path = require('path')
 const express = require('express')
 const logger = require('../logger')
-const { folders } = require('../folder-store')
+// const { folders } = require('../folder-store')
 const uuid = require('uuid/v4')
 const FoldersService = require('./folders-service')
 
@@ -9,7 +9,7 @@ const jsonParser = express.json()
 const foldersRouter = express.Router()
 
 foldersRouter
-    .route('/')
+    .route('/folders')
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         FoldersService.getAllFolders(knexInstance)
@@ -46,10 +46,11 @@ foldersRouter
 
 foldersRouter
     .route('/folders/:id')
-    .all((req,res, next) => {
+    .get((req, res) => {
+        const { id } = req.params
         FoldersService.getFolderById(
             req.app.get('db'),
-            req.params.id
+            id
         )
         .then(folder => {
             if(!folder) {
@@ -57,22 +58,9 @@ foldersRouter
                     error: { message: `Folder doesn't exist`}
                 })
             }
-            res.folder = folder
-            next()
+            res.json(folder)
         })
         .catch(next)
-    })
-    .get((req, res, next) => {
-        const { id } = req.params
-        const folder = folders.find(f => f.id == id)
-
-        if(!folder) {
-            logger.error(`Folder with id: ${id} not found.`)
-            return res
-                .status(404)
-                .send('Folder not found')
-        }
-        res.json(folder)
     })
     .delete((req, res, next) => {
         const { id } = req.params
@@ -86,9 +74,8 @@ foldersRouter
            }
 
         FoldersService.deleteFolder(
-            req.app.get('db'),
-            id)
-            .then(deletedBookmark => {
+            req.app.get('db'), id )
+            .then(deletedFolder => {
             logger.info(`Folder with id: ${id} deleted.`)
             res
                 .status(204)

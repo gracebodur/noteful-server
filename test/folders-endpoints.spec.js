@@ -16,7 +16,7 @@ describe('Folders Endpoints', function() {
 
     after('disconnect from db', () => db.destroy())
 
-    before('clean the table', () => db('folders').truncate())
+    // before('clean the table', () => db('folders').truncate())
 
     afterEach('cleanup', () => db('folders').truncate())
 
@@ -179,7 +179,7 @@ describe('Folders Endpoints', function() {
             })
         })
 
-    describe.only(`PATCH /folders/:id`, () => {
+    describe(`PATCH /folders/:id`, () => {
         context(`Given no folders`, () => {
             it(`responds with 404`, () => {
                 const folderId = 123456
