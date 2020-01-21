@@ -2,8 +2,9 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const { makeFoldersArray } = require('./fixtures/folders.fixtures')
+const { makeNotesArray } = require('./fixtures/notes.fixtures')
 
-describe('Folders Endpoints', function() {
+describe.only('Folders Endpoints', function() {
     let db
    
     before('make knex instance', () => {
@@ -16,9 +17,9 @@ describe('Folders Endpoints', function() {
 
     after('disconnect from db', () => db.destroy())
 
-    // before('clean the table', () => db('folders').truncate())
+    before('clean the table', () => db.raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE'))
 
-    afterEach('cleanup', () => db('folders').truncate())
+    afterEach('cleanup', () => db.raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE'))
 
     describe(`GET /folders`, () => {
         context(`Given no folders`, () => {
@@ -32,11 +33,17 @@ describe('Folders Endpoints', function() {
         
         context('Given there are folders in the database', () => {
             const testFolders = makeFoldersArray()
-
+            const testNotes = makeNotesArray()
+         
             beforeEach('insert folders', () => {
+              return db
+              .into('notes')
+              .insert(testNotes)
+              .then(() => {
                 return db
-                    .into('folders')
-                    .insert(testFolders)
+                .into('folders')
+                .insert(testFolders)
+              })
             })
 
             it('responds with 200 and all of the folders', () => {
@@ -60,11 +67,17 @@ describe('Folders Endpoints', function() {
 
         context(`Given there are folders in the database`, () => {
             const testFolders = makeFoldersArray()
-
+            const testNotes = makeNotesArray()
+         
             beforeEach('insert folders', () => {
+              return db
+              .into('notes')
+              .insert(testNotes)
+              .then(() => {
                 return db
-                    .into('folders')
-                    .insert(testFolders)
+                .into('folders')
+                .insert(testFolders)
+              })
             })
 
             it('responds with 200 and the specified folder', () => {
@@ -155,12 +168,19 @@ describe('Folders Endpoints', function() {
 
         context('Given there are folders in the database', () => {
             const testFolders = makeFoldersArray()
+            const testNotes = makeNotesArray()
          
             beforeEach('insert folders', () => {
+              return db
+              .into('notes')
+              .insert(testNotes)
+              .then(() => {
                 return db
-                 .into('folders')
-                 .insert(testFolders)
+                .into('folders')
+                .insert(testFolders)
+              })
             })
+               
          
             it('responds with 204 and removes the folder', () => {
                 const idToRemove = 2
@@ -192,12 +212,18 @@ describe('Folders Endpoints', function() {
 
             context('Given there are folders in the database', () => {
              const testFolders = makeFoldersArray()
-        
-             beforeEach('insert folders', () => {
-               return db
-                 .into('folders')
-                 .insert(testFolders)
-             })
+             const testNotes = makeNotesArray()
+         
+            beforeEach('insert folders', () => {
+              return db
+              .into('notes')
+              .insert(testNotes)
+              .then(() => {
+                return db
+                .into('folders')
+                .insert(testFolders)
+              })
+            })
         
             it('responds with 204 and updates the folder', () => {
                const idToUpdate = 2
@@ -257,7 +283,7 @@ describe('Folders Endpoints', function() {
                           .get(`/folders/${idToUpdate}`)
                           .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                           .expect(expectedFolder)
-                        )
+                    )
                 })
            })
         })

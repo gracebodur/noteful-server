@@ -2,6 +2,7 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const { makeNotesArray } = require('./fixtures/notes.fixtures')
+const { makeFoldersArray } = require('./fixtures/folders.fixtures')
 
 describe('Notes Endpoints', function() {
     let db
@@ -16,9 +17,9 @@ describe('Notes Endpoints', function() {
 
     after('disconnect from db', () => db.destroy())
 
-    // before('clean the table', () => db('notes').truncate())
+    before('clean the table', () => db.raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE'))
 
-    afterEach('cleanup', () => db('notes').truncate())
+    afterEach('cleanup', () => db.raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE'))
 
     describe(`GET /notes`, () => {
         context(`Given no notes`, () => {
@@ -32,11 +33,17 @@ describe('Notes Endpoints', function() {
         
         context('Given there are notes in the database', () => {
             const testNotes = makeNotesArray()
+            const testFolders = makeFoldersArray()
 
             beforeEach('insert notes', () => {
                 return db
                     .into('notes')
                     .insert(testNotes)
+                    .then(() => {
+                        return db
+                            .into('folders')
+                            .insert(testFolders)
+                    })
             })
 
             it('responds with 200 and all of the notes', () => {
@@ -60,6 +67,7 @@ describe('Notes Endpoints', function() {
 
         context(`Given there are notes in the database`, () => {
             const testNotes = makeNotesArray()
+            const testFolders = makeFoldersArray()
 
             beforeEach('insert notes', () => {
                 return db

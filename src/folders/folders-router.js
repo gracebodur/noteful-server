@@ -1,12 +1,18 @@
 const path = require('path')
 const express = require('express')
 const logger = require('../logger')
-// const { folders } = require('../folder-store')
-const uuid = require('uuid/v4')
+const { folders } = require('../folder-store')
+const xss = require('xss')
+// const uuid = require('uuid/v4')
 const FoldersService = require('./folders-service')
 
 const jsonParser = express.json()
 const foldersRouter = express.Router()
+
+const serializeUser = folder => ({
+    id: folder.id,
+    name: xss(folder.fullname),
+})
 
 foldersRouter
     .route('/folders')
@@ -19,7 +25,7 @@ foldersRouter
         .catch(next)
     })
     .post(jsonParser, (req, res, next) => {
-        const id = uuid()
+        // const id = uuid()
         const { name } = req.body
         const newFolder = { id, name }
 
@@ -47,6 +53,7 @@ foldersRouter
 foldersRouter
     .route('/folders/:id')
     .get((req, res) => {
+        res.json(serializeUser(res.user))
         const { id } = req.params
         FoldersService.getFolderById(
             req.app.get('db'),
@@ -91,7 +98,7 @@ foldersRouter
             if(numberOfValues === 0) {
                 return res.status(400).json({
                     error: {
-                        message: `Request body must contain a folder name`
+                        message: `Request body must contain a folder 'name'`
                     }
                 })
             }
