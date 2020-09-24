@@ -9,9 +9,9 @@ const FoldersService = require('./folders-service')
 const jsonParser = express.json()
 const foldersRouter = express.Router()
 
-const serializeUser = folder => ({
-    id: folder.id,
-    name: xss(folder.fullname),
+const serializeUser = folders => ({
+    // id: folders.id,
+    name: xss(folders.name),
 })
 
 foldersRouter

@@ -37,12 +37,12 @@ describe.only('Folders Endpoints', function() {
          
             beforeEach('insert folders', () => {
               return db
-              .into('notes')
-              .insert(testNotes)
+              .into('folders')
+              .insert(testFolders)
               .then(() => {
                 return db
-                .into('folders')
-                .insert(testFolders)
+                .into('notes')
+                .insert(testNotes)
               })
             })
 
